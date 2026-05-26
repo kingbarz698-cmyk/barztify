@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
     unzip git curl zip \
     && rm -rf /var/lib/apt/lists/*
 
+# Install PHP extensions yang dibutuhkan
+RUN docker-php-ext-install pdo pdo_mysql
+
 # Enable Apache rewrite module
 RUN a2enmod rewrite
 
