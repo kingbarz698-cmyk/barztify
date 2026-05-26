@@ -1,0 +1,19 @@
+# Composer — vendor/ TIDAK boleh di-commit
+# Ini root cause dari error App\Config\App not found
+vendor/
+
+# Environment files — jangan commit secrets
+.env
+.env.local
+.env.development
+.env.mobile
+
+# Logs
+logs/*.log
+!logs/.gitkeep
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+.idea
+.vscode

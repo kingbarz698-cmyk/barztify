@@ -1,0 +1,26 @@
+# vendor/ TIDAK di-ignore di sini karena:
+# - Dockerfile sudah jalankan composer install dari scratch
+# - vendor/ yang di-commit ke git akan di-overwrite oleh RUN composer install
+# - Tapi lebih clean kalau vendor/ tidak masuk build context sama sekali
+vendor/
+
+# Git
+.git
+.gitignore
+
+# Local env (gunakan Cloud Run env vars / secrets)
+.env
+.env.local
+.env.development
+.env.mobile
+
+# Logs
+logs/*.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.swp
+*.swo
