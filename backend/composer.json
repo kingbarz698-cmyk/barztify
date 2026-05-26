@@ -1,0 +1,11 @@
+{
+  "name": "barztify/backend",
+  "description": "Barztify backend API",
+  "require": {
+    "phpmailer/phpmailer": "^6.9"
+  },
+  "autoload": {
+    "psr-4": { "App\\": "app/" }
+  },
+  "minimum-stability": "stable"
+}
