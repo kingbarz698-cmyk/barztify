@@ -250,3 +250,46 @@ async def artist_tracks(artist_id: str, limit: int = Query(20, ge=1, le=50)):
     except Exception as e:
         logger.error(f"Artist tracks error: {e}")
         raise HTTPException(status_code=500, detail="Artist tracks fetch failed.")
+
+
+# ─── Debug (HAPUS sebelum production) ────────────────────────────────────────
+
+@app.get("/debug/formats/{video_id}")
+async def debug_formats(video_id: str):
+    """List semua format tersedia untuk video — untuk diagnosa yt-dlp."""
+    import yt_dlp, os
+    _COOKIES_FILE = os.path.join(os.path.dirname(__file__), "cookies.txt")
+    opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "noplaylist": True,
+    }
+    if os.path.exists(_COOKIES_FILE):
+        opts["cookiefile"] = _COOKIES_FILE
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+        formats = info.get("formats", [])
+        audio_fmts = [
+            {
+                "format_id": f.get("format_id"),
+                "ext":        f.get("ext"),
+                "acodec":     f.get("acodec"),
+                "vcodec":     f.get("vcodec"),
+                "abr":        f.get("abr"),
+                "tbr":        f.get("tbr"),
+                "has_url":    bool(f.get("url")),
+            }
+            for f in formats
+            if f.get("acodec") and f.get("acodec") != "none"
+        ]
+        return {
+            "videoId":       video_id,
+            "title":         info.get("title"),
+            "cookies_used":  os.path.exists(_COOKIES_FILE),
+            "total_formats": len(formats),
+            "audio_formats": audio_fmts,
+        }
+    except Exception as e:
+        return {"error": str(e), "cookies_used": os.path.exists(_COOKIES_FILE)}

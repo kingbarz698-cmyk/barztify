@@ -7,10 +7,10 @@
 import axios, { AxiosError } from 'axios'
 import type { Track, Album, Artist } from '@/types'
 
-const MUSIC_API = import.meta.env.VITE_MUSIC_API_URL || 'http://localhost:7979'
+const MUSIC_API = (import.meta.env.VITE_MUSIC_API_URL as string) || ''
 
 const musicApi = axios.create({
-  baseURL: MUSIC_API,
+  baseURL: MUSIC_API || undefined,
   timeout: 25000, // Generous timeout for yt-dlp stream extraction
   headers: { 'Content-Type': 'application/json' },
 })
@@ -26,6 +26,18 @@ musicApi.interceptors.response.use(
     return Promise.reject(new Error(msg))
   }
 )
+
+// Safe request helper: when MUSIC_API is not configured or request fails,
+// return a controlled default so the UI doesn't crash.
+async function safeGet<T>(url: string, defaultValue: T): Promise<T> {
+  if (!MUSIC_API) return defaultValue
+  try {
+    const { data } = await musicApi.get(url)
+    return data as T
+  } catch (e) {
+    return defaultValue
+  }
+}
 
 // ─── Response shape from FastAPI ─────────────────────────────────────────────
 
@@ -93,6 +105,7 @@ async function getStreamUrl(videoId: string): Promise<string> {
   if (cached && Date.now() - cached.cachedAt < STREAM_CACHE_TTL) {
     return cached.url
   }
+  if (!MUSIC_API) throw new Error('Music API unavailable')
   const { data } = await musicApi.get(`/stream/${videoId}`)
   const url: string = data.data?.url
   if (!url) throw new Error('No stream URL returned from backend')
@@ -115,9 +128,7 @@ export async function searchTracks(
   offset = 0
 ): Promise<PaginatedTracks> {
   if (!query.trim()) return { tracks: [], total: 0, hasMore: false }
-  const { data } = await musicApi.get('/search', {
-    params: { q: query.trim(), type: 'tracks', limit },
-  })
+  const data = await safeGet('/search', { data: [], total: 0 })
   const tracks = ((data.data || []) as ApiTrack[]).map(mapTrack)
   const sliced = tracks.slice(offset, offset + limit)
   return {
@@ -130,9 +141,7 @@ export async function searchTracks(
 /** Search albums */
 export async function searchAlbums(query: string, limit = 10): Promise<Album[]> {
   if (!query.trim()) return []
-  const { data } = await musicApi.get('/search', {
-    params: { q: query.trim(), type: 'albums', limit },
-  })
+  const data = await safeGet('/search', { data: [], total: 0 })
   return ((data.data || []) as ApiAlbum[]).map((a) => ({
     id:         a.id,
     title:      a.title,
@@ -146,9 +155,7 @@ export async function searchAlbums(query: string, limit = 10): Promise<Album[]> 
 /** Search artists */
 export async function searchArtists(query: string, limit = 10): Promise<Artist[]> {
   if (!query.trim()) return []
-  const { data } = await musicApi.get('/search', {
-    params: { q: query.trim(), type: 'artists', limit },
-  })
+  const data = await safeGet('/search', { data: [], total: 0 })
   return ((data.data || []) as ApiArtist[]).map((a) => ({
     id:               a.id,
     name:             a.name,
@@ -164,14 +171,14 @@ export async function getTrendingTracks(
   country = 'ID',
   limit = 20
 ): Promise<PaginatedTracks> {
-  const { data } = await musicApi.get('/trending', { params: { country, limit } })
+  const data = await safeGet('/trending', { data: [] })
   const tracks = ((data.data || []) as ApiTrack[]).map(mapTrack)
   return { tracks, total: tracks.length, hasMore: false }
 }
 
 /** New releases */
 export async function getNewReleases(limit = 12): Promise<PaginatedTracks> {
-  const { data } = await musicApi.get('/new-releases', { params: { limit } })
+  const data = await safeGet('/new-releases', { data: [] })
   const tracks = ((data.data || []) as ApiTrack[]).map(mapTrack)
   return { tracks, total: tracks.length, hasMore: false }
 }
@@ -183,9 +190,7 @@ export async function getTracksByGenre(
   offset = 0
 ): Promise<PaginatedTracks> {
   if (!genre.trim()) return { tracks: [], total: 0, hasMore: false }
-  const { data } = await musicApi.get('/genre', {
-    params: { genre: genre.trim(), limit },
-  })
+  const data = await safeGet('/genre', { data: [] })
   const tracks = ((data.data || []) as ApiTrack[]).map(mapTrack)
   const sliced = tracks.slice(offset, offset + limit)
   return { tracks: sliced, total: tracks.length, hasMore: offset + limit < tracks.length }
@@ -194,9 +199,7 @@ export async function getTracksByGenre(
 /** Recommendations / radio based on seed track */
 export async function getRecommendations(videoId: string, limit = 20): Promise<Track[]> {
   if (!videoId) return []
-  const { data } = await musicApi.get('/recommendations', {
-    params: { video_id: videoId, limit },
-  })
+  const data = await safeGet('/recommendations', { data: [] })
   return ((data.data || []) as ApiTrack[]).map(mapTrack)
 }
 

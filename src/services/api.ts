@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/barztify/backend/api'
+const API_URL = import.meta.env.VITE_API_URL || 'https://barztify-backend-885870364096.asia-southeast2.run.app/api'
 
 const apiClient = axios.create({
   baseURL: API_URL,

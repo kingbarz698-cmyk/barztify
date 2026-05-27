@@ -13,6 +13,7 @@ import {
   useInfiniteQuery,
   type UseInfiniteQueryResult,
   type UseQueryResult,
+  type InfiniteData,
 } from '@tanstack/react-query'
 import {
   searchTracks,
@@ -134,7 +135,7 @@ export function useRecommendations(videoId: string): UseQueryResult<Track[]> {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function flattenInfiniteQuery(
-  result: UseInfiniteQueryResult<PaginatedTracks, Error>
+  result: UseInfiniteQueryResult<InfiniteData<PaginatedTracks, unknown>, Error>
 ): Track[] {
-  return result.data?.pages.flatMap((p) => p.tracks) ?? []
+  return result.data?.pages.flatMap((p: PaginatedTracks) => p.tracks) ?? []
 }

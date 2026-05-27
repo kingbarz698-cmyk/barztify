@@ -1,16 +1,9 @@
-/**
- * Hook untuk infinite scroll — detect kapan sentinel element
- * masuk viewport, trigger load more.
- *
- * FIX: options object stabilized with useRef to prevent
- * IntersectionObserver reconnect on every render.
- */
 import { useEffect, useRef, type RefObject } from 'react'
 
 export function useIntersectionObserver(
   callback: () => void,
   options: IntersectionObserverInit = { threshold: 0.1 }
-): RefObject<HTMLDivElement | null> {
+): RefObject<HTMLDivElement> {
   const ref         = useRef<HTMLDivElement>(null)
   const callbackRef = useRef(callback)
   const optionsRef  = useRef(options)
@@ -29,5 +22,5 @@ export function useIntersectionObserver(
     return () => observer.disconnect()
   }, []) // only mount/unmount — ref and options are stable
 
-  return ref
+  return ref as RefObject<HTMLDivElement>
 }

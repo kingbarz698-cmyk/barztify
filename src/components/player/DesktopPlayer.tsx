@@ -26,7 +26,7 @@ export function DesktopPlayer() {
         {/* Track info */}
         <div className="flex items-center gap-3 w-64 flex-shrink-0">
           <div className="relative">
-            <TrackThumbnail src={currentTrack.coverUrl} size="md" rounded="md" />
+            <TrackThumbnail src={currentTrack.coverUrl} alt={currentTrack.title} size={40} />
             {isBuffering && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
                 <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />

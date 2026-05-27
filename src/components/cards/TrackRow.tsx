@@ -35,7 +35,7 @@ export function TrackRow({ track, index, isActive, isPlaying, onPlay, onMore, on
           <span className={`text-label-md ${isActive ? 'text-primary' : 'text-outline'}`}>{index}</span>
         ) : (
           <div className="relative">
-            <TrackThumbnail src={track.coverUrl} size="sm" rounded="sm" />
+            <TrackThumbnail src={track.coverUrl} alt={track.title} size={32} />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 rounded transition-opacity">
               {isPlaying ? <Pause size={12} fill="white" strokeWidth={0} /> : <Play size={12} fill="white" className="ml-0.5" strokeWidth={0} />}
             </div>

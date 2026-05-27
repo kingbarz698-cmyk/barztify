@@ -78,7 +78,7 @@ export function NowPlaying() {
                 className="w-full max-w-[290px] aspect-square rounded-2xl overflow-hidden shadow-2xl relative">
                 {currentTrack.coverUrl
                   ? <img src={currentTrack.coverUrl} alt={currentTrack.title} className="w-full h-full object-cover" />
-                  : <TrackThumbnail size="xl" className="w-full h-full rounded-none" />
+                  : <TrackThumbnail src="" alt={currentTrack.title} size={64} className="w-full h-full rounded-none" />
                 }
                 {isBuffering && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40">
